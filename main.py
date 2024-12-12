@@ -1,4 +1,5 @@
 import time
+from types import NoneType
 
 import telebot
 import random
@@ -61,17 +62,14 @@ def human_turn(message):
         used_cities.add(current_city)
     else:
         bot.send_message(chat_id, "Я не знаю такого города!")
-    bot_turn()
 
-@bot.message_handler(content_types=["text"])
-def bot_turn():
+def bot_turn(message):
     city_bot = random.choice(list(cities))
-    while city_bot in used_cities:
-        if city_bot not in used_cities:
-            bot.send_message(city_bot, f"Тебе на {city_bot[-1]}")
+    while city_bot not in used_cities:
+        if city_bot in cities:
+            bot.send_message(message.chat.id, f"Тебе на {city_bot[-1].upper()}")
             used_cities.add(city_bot)
-
-
+            human_turn()
 
 
 def load_cities():
@@ -79,8 +77,6 @@ def load_cities():
         for c in f.readlines():
             cities.add(c.strip())
 
-
-print(used_cities)
 
 
 bot.polling(non_stop=True)
