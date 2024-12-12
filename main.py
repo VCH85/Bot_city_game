@@ -8,7 +8,8 @@ bot = telebot.TeleBot("7826590907:AAF3e4KsK8c3rUHHWSpjYvihuGdD8IhAzBs", parse_mo
 
 cities = set()
 used_cities = set()
-curent_city = None
+current_city = None
+city = None
 
 
 @bot.message_handler(commands=["start"])
@@ -28,8 +29,7 @@ def rules(message):
 
 @bot.message_handler(commands=["new", "n"])
 def new_game(message):
-    global curent_city
-    curent_city = None
+    global city
     load_cities()
     chat_id = message.chat.id
     bot.send_message(chat_id, "Кто начинает? 0 - я, 1 - ты!")
@@ -39,8 +39,9 @@ def new_game(message):
         bot.send_message(chat_id, "0")
         bot.send_message(chat_id, "Я начинаю...")
         city = random.choice(list(cities))
-        used_cities.add(curent_city)
-        bot.send_message(chat_id, curent_city)
+        used_cities.add(city)
+        bot.send_message(chat_id, f"{city}. Тебе на {city[-1].upper()}")
+
     else:
         time.sleep(2)
         bot.send_message(chat_id, "1")
@@ -48,21 +49,27 @@ def new_game(message):
 
 @bot.message_handler(content_types=["text"])
 def human_turn(message):
-    global curent_city
+    global current_city
     chat_id = message.chat.id
-    text = message.text
+    text = message.text.capitalize()
     #if current_city is None:
     if text in used_cities:
         bot.send_message(chat_id, "Такой город уже был")
     elif text in cities:
-        bot.send_message(chat_id, "Отличный выбор!")
+        bot.send_message(chat_id, f"Отличный выбор! Мне на {text[-1].upper()}")
         current_city = text
-        used_cities.add(curent_city)
+        used_cities.add(current_city)
     else:
         bot.send_message(chat_id, "Я не знаю такого города!")
+    bot_turn()
 
-
-
+@bot.message_handler(content_types=["text"])
+def bot_turn():
+    city_bot = random.choice(list(cities))
+    while city_bot in used_cities:
+        if city_bot not in used_cities:
+            bot.send_message(city_bot, f"Тебе на {city_bot[-1]}")
+            used_cities.add(city_bot)
 
 
 
@@ -73,7 +80,8 @@ def load_cities():
             cities.add(c.strip())
 
 
-#    print(cities)
+print(used_cities)
+
 
 bot.polling(non_stop=True)
 
