@@ -62,14 +62,16 @@ def human_turn(message):
         used_cities.add(current_city)
     else:
         bot.send_message(chat_id, "Я не знаю такого города!")
-
-def bot_turn(message):
+@bot.message_handler(None)
+def bot_turn():
     city_bot = random.choice(list(cities))
+    print(city_bot)
     while city_bot not in used_cities:
         if city_bot in cities:
-            bot.send_message(message.chat.id, f"Тебе на {city_bot[-1].upper()}")
+            bot.send_message(f"Тебе на {city_bot[-1].upper()}")
             used_cities.add(city_bot)
-            human_turn()
+    human_turn()
+
 
 
 def load_cities():
